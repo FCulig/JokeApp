@@ -1,13 +1,14 @@
 package com.example.exceptions;
 
-public class UserNotFoundException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-	/**
-	 * 
-	 */
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class UserNotFoundException extends RuntimeException{
+	
 	private static final long serialVersionUID = 1580247757075460362L;
 
 	public UserNotFoundException(long userId) {
-		super("User does not exist id="+userId);
+		super("Could not find user with id="+userId);
 	}
 }

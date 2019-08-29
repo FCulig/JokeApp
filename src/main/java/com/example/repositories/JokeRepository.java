@@ -1,5 +1,6 @@
 package com.example.repositories;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,11 +14,21 @@ import com.example.entities.Joke;
 @Repository
 public interface JokeRepository extends JpaRepository<Joke, Long> {
 	
-	@Modifying
-	@Query("update joke set LIKES = LIKES + 1 where ID = ?1")
-	public void like(long jokeId);
+	public List<Joke> findByTimestamp(LocalDate dateString);
+
+	@Transactional
+	@Modifying(clearAutomatically = true)
+	@Query("update Joke j set j.likes = j.likes + 1 where j.id = ?1")
+	public void updateLikesFor(long jokeId);
+
 	
-	@Modifying
-	@Query("update joke set DISLIKES = DISLIKES + 1 where ID = ?1")
-	public void dislike(long jokeId);
+	@Transactional
+	@Modifying(clearAutomatically = true)
+	@Query(value = "update joke set joke.DISLIKES = joke.DISLIKES + 1 where joke.ID = ?1", nativeQuery = true)
+	public void updateDislikesFor(long jokeId);
+
+	@Modifying//(clearAutomatically = true)
+	@Transactional
+	@Query(value = "update joke set joke.JOKE = ?1 where joke.ID = ?2", nativeQuery = true)
+	public void editJoke(String newJoke, long jokeId);
 }

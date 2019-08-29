@@ -1,10 +1,17 @@
 package com.example.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.springframework.stereotype.Component;
 
 @Entity
+@Component
+@Table(name = "users")
 public class User {
+	
 	private @Id long id;
 	private String username;
 

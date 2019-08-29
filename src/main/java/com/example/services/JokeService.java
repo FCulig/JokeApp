@@ -1,10 +1,11 @@
 package com.example.services;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -14,23 +15,21 @@ import org.springframework.stereotype.Service;
 import com.example.entities.Joke;
 import com.example.exceptions.JokeNotFoundException;
 import com.example.repositories.JokeRepository;
-import com.example.utils.JokeComparator;
+import com.example.utils.JokeLikeDislikeComparator;
 
 @Service
-public class JokeService{
-	
+public class JokeService {
 	private AtomicLong nextId = new AtomicLong();
-	
-	//dodan static -> provjeri
+
 	@Autowired
 	private static JokeRepository jokeRepository;
-	
+
 	@Autowired
 	public JokeService(JokeRepository jokeRepository) {
 		super();
-		this.jokeRepository = jokeRepository;
+		JokeService.jokeRepository = jokeRepository;
 	}
-	
+
 	public Joke addJoke(Joke newJoke) {
 		newJoke.setId(nextId.getAndIncrement());
 		jokeRepository.save(newJoke);
@@ -42,72 +41,62 @@ public class JokeService{
 	}
 
 	public Joke getJoke(long jokeId) {
-		for (Joke jk : getAll()) {
-			if (jk.getId() == jokeId) {
-				return jk;
-			}
-		}
+		Optional<Joke> jk = jokeRepository.findById(jokeId);
 
-		throw new JokeNotFoundException(jokeId);
+		if (jk.isPresent()) {
+			return jk.get();
+		} else {
+			throw new JokeNotFoundException(jokeId);
+		}
 	}
 
 	public Joke editJoke(long jokeId, Joke newJoke) {
-		for (Joke jk : getAll()) {
-			if (jk.getId() == jokeId) {
-				newJoke.setId(jokeId);
-				newJoke.setLikes(jk.getLikes());
-				newJoke.setDislikes(jk.getDislikes());
-				newJoke.setTimestamp(LocalDate.now());
-				jokeRepository.delete(jk);
-				jokeRepository.save(newJoke);
-				return newJoke;
-			}
-		}
-
-		throw new JokeNotFoundException(jokeId);
+		/*jokeRepository.editJoke(newJoke.getJoke(), getJoke(jokeId).getId());
+		return getJoke(jokeId);*/
+		Joke jk = getJoke(jokeId); 
+		jk.setJoke(newJoke.getJoke());;
+		jokeRepository.save(jk);
+		return jk;
 	}
 
 	public Joke likeJoke(long jokeId) {
-		for (Joke jk : getAll()) {
-			if (jk.getId() == jokeId) {
-				jokeRepository.like(jokeId);
-				return jokeRepository.getOne(jokeId);
-			}
-		}
-
-		throw new JokeNotFoundException(jokeId);
+		jokeRepository.updateLikesFor(getJoke(jokeId).getId());
+		return getJoke(jokeId);
+//		Joke jk = getJoke(jokeId); 
+//		jk.setLikes(jk.getLikes()+1);
+//		jokeRepository.save(jk);
+//		return jk;
 	}
 
 	public Joke dislikeJoke(long jokeId) {
-		for (Joke jk : getAll()) {
-			if (jk.getId() == jokeId) {
-				jokeRepository.dislike(jokeId);
-				return jokeRepository.getOne(jokeId);
-			}
-		}
-
-		throw new JokeNotFoundException(jokeId);
+		/*jokeRepository.updateDislikesFor(getJoke(jokeId).getId());
+		return getJoke(jokeId);*/
+		Joke jk = getJoke(jokeId); 
+		jk.setDislikes(jk.getDislikes()+1);
+		jokeRepository.save(jk);
+		return jk;
 	}
 
 	public Joke randomJoke() {
-		return getAll().get(new Random().nextInt((int)jokeRepository.count()));
+		return getAll().get(new Random().nextInt((int) jokeRepository.count()));
 	}
 
 	public Joke bestJoke() {
 		List<Joke> jokes = getAll();
-		Collections.sort(jokes, new JokeComparator());
+		Collections.sort(jokes, new JokeLikeDislikeComparator());
 		return jokes.get(0);
 	}
 
 	public Joke worstJoke() {
 		List<Joke> jokes = getAll();
-		Collections.sort(jokes, new JokeComparator());
-		return jokes.get(jokes.size() - 1);
+		Collections.sort(jokes, new JokeLikeDislikeComparator());
+		Collections.reverse(jokes);
+		return jokes.get(0);
 	}
 
 	public List<Joke> topJokes(int n) {
 		List<Joke> jokes = getAll();
-		Collections.sort(jokes, new JokeComparator());
+		Collections.sort(jokes, new JokeLikeDislikeComparator());
 
 		List<Joke> bestJokes = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
@@ -119,10 +108,11 @@ public class JokeService{
 
 	public List<Joke> worstJokes(int n) {
 		List<Joke> jokes = getAll();
-		Collections.sort(jokes, new JokeComparator());
+		Collections.sort(jokes, new JokeLikeDislikeComparator());
+		Collections.reverse(jokes);
 
 		List<Joke> worstJokes = new ArrayList<>();
-		for (int i = jokes.size() - 1; i > jokes.size() - n - 1; i--) {
+		for (int i = 0; i < n; i++) {
 			worstJokes.add(jokes.get(i));
 		}
 
@@ -130,54 +120,40 @@ public class JokeService{
 	}
 
 	public Joke deleteJoke(long jokeId) {
-		for (Joke jk : getAll()) {
-			if (jk.getId() == jokeId) {
-				Joke deletedJoke = jk;
-				jokeRepository.delete(jk);
-				return deletedJoke;
-			}
-		}
-
-		throw new JokeNotFoundException(jokeId);
+		Joke deletedJoke = getJoke(jokeId);
+		jokeRepository.delete(deletedJoke);
+		return deletedJoke;
 	}
 
-	public List<Joke> getTodaysJokes(){
-		List<Joke> todays = new ArrayList<>();
-		LocalDateTime now = LocalDateTime.now();
-		for(Joke jk : getAll()) {
-			if(jk.getTimestamp().getYear()==now.getYear() &&
-					jk.getTimestamp().getMonth()==now.getMonth() &&
-					jk.getTimestamp().getDayOfMonth()==now.getDayOfMonth()) {
-				todays.add(jk);
-			}
+	public List<Joke> getTodaysJokes() {
+		List<Joke> todays = jokeRepository.findByTimestamp(LocalDate.now());
+		if(todays.isEmpty()) {
+			throw new JokeNotFoundException("There are no jokes from today!");
+		}else {
+			return todays;
 		}
-		
-		return todays;
 	}
-	
+
 	public Joke getTodaysBest() {
 		List<Joke> todays = getTodaysJokes();
-		Collections.sort(todays, new JokeComparator());
+		Collections.sort(todays, new JokeLikeDislikeComparator());
 		return todays.get(0);
 	}
-	
+
 	public Joke getTodaysWorst() {
 		List<Joke> todays = getTodaysJokes();
-		Collections.sort(todays, new JokeComparator());
-		return todays.get(todays.size()-1);
+		Collections.sort(todays, new JokeLikeDislikeComparator());
+		Collections.reverse(todays);
+		return todays.get(0);
 	}
-	
-	public List<Joke> getJokesAtDate(String dateString){
-		List<Joke> jokesAtDay = new ArrayList<>();
-		LocalDate date = LocalDate.parse(dateString);
-		for(Joke jk : getAll()) {
-			if(jk.getTimestamp().getYear()==date.getYear() &&
-					jk.getTimestamp().getMonth()==date.getMonth() &&
-					jk.getTimestamp().getDayOfMonth()==date.getDayOfMonth()) {
-				jokesAtDay.add(jk);
-			}
+
+	public List<Joke> getJokesAtDate(String dateString) {
+		List<Joke> jokesAtDay = jokeRepository.findByTimestamp(LocalDate.parse(dateString));
+		if(!jokesAtDay.isEmpty()) {
+			return jokesAtDay;
+		}else {
+			throw new JokeNotFoundException("Could not find jokes from day "+dateString);
 		}
-		return jokesAtDay;
 	}
-	
+
 }

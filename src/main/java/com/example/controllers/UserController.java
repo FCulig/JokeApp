@@ -19,37 +19,37 @@ import com.example.services.UserService;
 @RequestMapping("users")
 public class UserController {
 	private UserService service;
-	
+
 	@Autowired
-	public UserController (UserService service) {
+	public UserController(UserService service) {
 		this.service = service;
 	}
-	
+
 	@GetMapping("")
-	public List<User> getAllUsers(){
-		return service.getAllUsers();
+	public List<User> getAllUsers() {
+		return UserService.getAllUsers();
 	}
-	
+
 	@GetMapping("/{id}")
 	public User getUser(@PathVariable("id") long userId) {
-		return service.getUser(userId);
+		return UserService.getUser(userId);
 	}
-	
+
 	@PostMapping("")
 	public User addUser(@RequestBody User newUser) {
 		return service.addUser(newUser);
 	}
-	
+
 	@DeleteMapping("/{id}")
 	public User deleteUser(@PathVariable("id") long userId) {
 		return service.deleteUser(userId);
 	}
-	
+
 	@GetMapping("/mostactive")
 	public User getMostActiveUser() {
 		return service.getMostActiveUser();
 	}
-	
+
 	@GetMapping("/{id}/jokes")
 	public List<Joke> getUserJokes(@PathVariable("id") long userId) {
 		return service.getUserJokes(userId);

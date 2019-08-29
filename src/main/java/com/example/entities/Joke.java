@@ -2,21 +2,33 @@ package com.example.entities;
 
 import java.time.LocalDate;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
+import com.example.services.UserService;
+
 @Entity
 @Component
+@Table(name = "joke")
 public class Joke {
 	private String joke;
 	private @Id long id;
 	private int likes;
 	private int dislikes;
-	private long userId;
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "user_id", referencedColumnName = "id")
+	private User author;
 	private LocalDate timestamp = LocalDate.now();
-	
+
 	public Joke(String joke, long id, int nmbrLikes, int nmbrDislikes) {
 		super();
 		this.joke = joke;
@@ -25,7 +37,7 @@ public class Joke {
 		this.dislikes = nmbrDislikes;
 		this.timestamp = LocalDate.now();
 	}
-	
+
 	public Joke(String joke, int nmbrLikes, int nmbrDislikes) {
 		super();
 		this.joke = joke;
@@ -33,7 +45,7 @@ public class Joke {
 		this.dislikes = nmbrDislikes;
 		this.timestamp = LocalDate.now();
 	}
-	
+
 	public Joke(String joke, long id) {
 		super();
 		this.joke = joke;
@@ -42,7 +54,7 @@ public class Joke {
 		this.dislikes = 0;
 		this.timestamp = LocalDate.now();
 	}
-	
+
 	public Joke(String joke) {
 		super();
 		this.joke = joke;
@@ -50,21 +62,22 @@ public class Joke {
 		this.dislikes = 0;
 		this.timestamp = LocalDate.now();
 	}
-	
+
+	public Joke(User author, String joke) {
+		super();
+		this.joke = joke;
+		this.author = author;
+		this.timestamp = LocalDate.now();
+	}
+
 	public Joke(long userId, String joke) {
 		super();
 		this.joke = joke;
-		this.userId = userId;
+		this.timestamp = LocalDate.now();
+		this.author = UserService.getUser(userId);
 	}
 
-	public Joke() {}
-	
-	public long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
+	public Joke() {
 	}
 
 	public LocalDate getTimestamp() {
@@ -105,6 +118,20 @@ public class Joke {
 
 	public void setDislikes(int nmbrDislikes) {
 		this.dislikes = nmbrDislikes;
+	}
+
+	public User getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(User author) {
+		this.author = author;
+	}
+
+	@Override
+	public String toString() {
+		return "Joke [joke=" + joke + ", id=" + id + ", likes=" + likes + ", dislikes=" + dislikes + ", author="
+				+ author + ", timestamp=" + timestamp + "]";
 	}
 
 }

@@ -19,8 +19,13 @@ import com.example.services.JokeService;
 @RequestMapping("jokes")
 public class JokeController {
 	
-	//PROVJERI: like/dislike dal dobro radi
-	
+	/*TODO:
+	 * many to many
+	 * svi vicevi od usera - posalji objekt usera i onda pretrazi bazu
+	 * promijeni update statemente 
+	 * metoda za provjeru dali joke postoji
+	 * */
+
 	private JokeService service;
 
 	@Autowired
@@ -32,10 +37,10 @@ public class JokeController {
 	public Joke addJoke(@RequestBody Joke newJoke) {
 		return service.addJoke(newJoke);
 	}
-	
+
 	@GetMapping("")
 	public List<Joke> all() {
-		return service.getAll();
+		return JokeService.getAll();
 	}
 
 	@GetMapping("/{id}")
@@ -44,66 +49,65 @@ public class JokeController {
 	}
 
 	@PostMapping("/{id}")
-	public Joke editJoke(@PathVariable("id") long jokeId, 
-			@RequestBody Joke newJoke) {
+	public Joke editJoke(@PathVariable("id") long jokeId, @RequestBody Joke newJoke) {
 		return service.editJoke(jokeId, newJoke);
 	}
-	
+
 	@PostMapping("/{id}/like")
 	public Joke likeJoke(@PathVariable("id") long jokeId) {
 		return service.likeJoke(jokeId);
 	}
-	
+
 	@PostMapping("/{id}/dislike")
 	public Joke dislikeJoke(@PathVariable("id") long jokeId) {
 		return service.dislikeJoke(jokeId);
 	}
-	
+
 	@GetMapping("/random")
 	public Joke getRandomJoke() {
 		return service.randomJoke();
 	}
-	
+
 	@GetMapping("/best")
-	public Joke bestJoke(){
+	public Joke bestJoke() {
 		return service.bestJoke();
 	}
 
-	@GetMapping(value="/best", params="n")
-	public List<Joke> bestJokes(@RequestParam int n){
+	@GetMapping(value = "/best", params = "n")
+	public List<Joke> bestJokes(@RequestParam int n) {
 		return service.topJokes(n);
 	}
-	
+
 	@GetMapping("/worst")
 	public Joke worstJoke() {
 		return service.worstJoke();
 	}
-	
-	@GetMapping(value = "/worst", params ="n")
-	public List<Joke> worstJokes(@RequestParam String n){
+
+	@GetMapping(value = "/worst", params = "n")
+	public List<Joke> worstJokes(@RequestParam String n) {
 		return service.worstJokes(Integer.parseInt(n));
 	}
-	
+
 	@DeleteMapping("/{id}")
 	public Joke deleteJoke(@PathVariable("id") long jokeId) {
 		return service.deleteJoke(jokeId);
 	}
-	
+
 	@GetMapping("/todayjokes")
-	public List<Joke> getTodaysJokes(){
+	public List<Joke> getTodaysJokes() {
 		return service.getTodaysJokes();
 	}
-	
-	@GetMapping(value="", params ="date")
-	public List<Joke> jokesOfDay(@RequestParam String date){
+
+	@GetMapping(value = "", params = "date")
+	public List<Joke> jokesOfDay(@RequestParam String date) {
 		return service.getJokesAtDate(date);
 	}
-	
+
 	@GetMapping("/todaybest")
 	public Joke getTodaysBest() {
 		return service.getTodaysBest();
 	}
-	
+
 	@GetMapping("/todayworst")
 	public Joke getTodaysWorst() {
 		return service.getTodaysWorst();

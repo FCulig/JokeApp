@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.example.entities.Joke;
 
-public class JokeComparator implements Comparator<Joke>{
+public class JokeLikeDislikeComparator implements Comparator<Joke>{
 
 	@Override
 	public int compare(Joke o1, Joke o2) {

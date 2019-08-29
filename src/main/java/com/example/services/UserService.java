@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,68 +18,34 @@ import com.example.repositories.UserRepository;
 @Service
 public class UserService {
 	private static AtomicLong nextId = new AtomicLong();
-	
+
 	@Autowired
 	private static UserRepository userRepository;
-	
+
 	@Autowired
 	public UserService(UserRepository userRepository) {
 		super();
-		this.userRepository = userRepository;
+		UserService.userRepository = userRepository;
 	}
-	
+
 	public User addUser(User newUser) {
 		newUser.setId(nextId.getAndIncrement());
 		userRepository.save(newUser);
 		return newUser;
 	}
 
-	/*public static User addUser(User newUser) {
-		long id;
-		boolean taken;
-		do {
-			taken = false;
-			id = nextId.getAndIncrement();
-			for(User usr : users) {
-				if(usr.getId() == id) {
-					taken = true;
-					break;
-				}
-			}
-			
-		}while(taken);
-		newUser.setId(id);
-		users.add(newUser);
-		return newUser;
-	}
-
-	public static User addUserIfDoesntExist(User newUser) {
-		boolean exists = false;
-		for(User usr : users) {
-			if(usr.getId() == newUser.getId()) {
-				exists = true;
-			}
-		}
-		
-		if(!exists) {
-			users.add(newUser);
-		}
-		
-		return newUser;
-	}*/
-
 	public static List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
 
 	public static User getUser(long userId) {
-		for (User us : getAllUsers()) {
-			if (us.getId() == userId) {
-				return us;
-			}
+		Optional<User> usr = userRepository.findById(userId);
+		
+		if(usr.isPresent()) {
+			return usr.get();
+		}else {
+			throw new UserNotFoundException(userId);
 		}
-
-		throw new UserNotFoundException(userId);
 	}
 
 	public User getMostActiveUser() {
@@ -90,7 +57,7 @@ public class UserService {
 		}
 
 		for (Joke jk : jokes) {
-			counter.put(jk.getUserId(), counter.get(jk.getUserId()) + 1);
+			counter.put(jk.getAuthor().getId(), counter.get(jk.getAuthor().getId()) + 1);
 		}
 
 		Map.Entry<Long, Integer> first = counter.entrySet().iterator().next();
@@ -105,27 +72,22 @@ public class UserService {
 
 		return getUser(maxId);
 	}
-	
+
 	public User deleteUser(long userId) {
-		for(User usr : getAllUsers()) {
-			if(usr.getId() == userId) {
-				userRepository.delete(usr);
-				return usr;
-			}
-		}
-		
-		throw new UserNotFoundException(userId);
+		User deletedUser = getUser(userId);
+		userRepository.delete(deletedUser);
+		return deletedUser;
 	}
-	
-	public List<Joke> getUserJokes(long userId){
+
+	public List<Joke> getUserJokes(long userId) {
 		User usr = getUser(userId);
 		List<Joke> usersJokes = new ArrayList<>();
-		for(Joke jk : JokeService.getAll()) {
-			if(jk.getUserId() == usr.getId()) {
+		for (Joke jk : JokeService.getAll()) {
+			if (jk.getAuthor().getId() == usr.getId()) {
 				usersJokes.add(jk);
 			}
 		}
-		
+
 		return usersJokes;
 	}
 }
