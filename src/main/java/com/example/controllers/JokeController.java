@@ -18,13 +18,6 @@ import com.example.services.JokeService;
 @RestController
 @RequestMapping("jokes")
 public class JokeController {
-	
-	/*TODO:
-	 * many to many
-	 * svi vicevi od usera - posalji objekt usera i onda pretrazi bazu
-	 * promijeni update statemente 
-	 * metoda za provjeru dali joke postoji
-	 * */
 
 	private JokeService service;
 
@@ -45,7 +38,7 @@ public class JokeController {
 
 	@GetMapping("/{id}")
 	public Joke getJoke(@PathVariable("id") long jokeId) {
-		return service.getJoke(jokeId);
+		return JokeService.getJoke(jokeId);
 	}
 
 	@PostMapping("/{id}")
@@ -112,4 +105,16 @@ public class JokeController {
 	public Joke getTodaysWorst() {
 		return service.getTodaysWorst();
 	}
+	
+	@GetMapping("/mostfavorable")
+	public Joke getMostFavorableJoke() {
+		return service.getMostFavorableJoke();
+	}
+	
+	@GetMapping("/allfavoritedjokes")
+	public List<Joke> getAllFavoritedJokes(){
+		return service.getAllFavoritedJokes();
+	}
+	
+	
 }

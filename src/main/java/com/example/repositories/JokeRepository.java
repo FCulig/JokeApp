@@ -10,25 +10,27 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.entities.Joke;
+import com.example.entities.User;
 
 @Repository
 public interface JokeRepository extends JpaRepository<Joke, Long> {
 	
 	public List<Joke> findByTimestamp(LocalDate dateString);
 
+	public List<Joke> findByAuthor(User user);
+	
 	@Transactional
 	@Modifying(clearAutomatically = true)
 	@Query("update Joke j set j.likes = j.likes + 1 where j.id = ?1")
 	public void updateLikesFor(long jokeId);
-
 	
 	@Transactional
 	@Modifying(clearAutomatically = true)
-	@Query(value = "update joke set joke.DISLIKES = joke.DISLIKES + 1 where joke.ID = ?1", nativeQuery = true)
+	@Query("update Joke j set j.dislikes = j.dislikes + 1 where j.id = ?1")
 	public void updateDislikesFor(long jokeId);
 
-	@Modifying//(clearAutomatically = true)
+	@Modifying(clearAutomatically = true)
 	@Transactional
-	@Query(value = "update joke set joke.JOKE = ?1 where joke.ID = ?2", nativeQuery = true)
+	@Query("update Joke j set j.joke = ?1 where j.id = ?2")
 	public void editJoke(String newJoke, long jokeId);
 }

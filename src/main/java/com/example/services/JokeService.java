@@ -1,10 +1,11 @@
 package com.example.services;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,8 +13,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.entities.Favorite;
 import com.example.entities.Joke;
+import com.example.entities.User;
 import com.example.exceptions.JokeNotFoundException;
+import com.example.repositories.FavoriteRepository;
 import com.example.repositories.JokeRepository;
 import com.example.utils.JokeLikeDislikeComparator;
 
@@ -23,11 +27,15 @@ public class JokeService {
 
 	@Autowired
 	private static JokeRepository jokeRepository;
+	
+	@Autowired
+	private static FavoriteRepository favoriteRepository;
 
 	@Autowired
-	public JokeService(JokeRepository jokeRepository) {
+	public JokeService(JokeRepository jokeRepository, FavoriteRepository favoriteRepository) {
 		super();
 		JokeService.jokeRepository = jokeRepository;
+		JokeService.favoriteRepository = favoriteRepository;
 	}
 
 	public Joke addJoke(Joke newJoke) {
@@ -40,7 +48,7 @@ public class JokeService {
 		return jokeRepository.findAll();
 	}
 
-	public Joke getJoke(long jokeId) {
+	public static Joke getJoke(long jokeId) {
 		Optional<Joke> jk = jokeRepository.findById(jokeId);
 
 		if (jk.isPresent()) {
@@ -49,32 +57,28 @@ public class JokeService {
 			throw new JokeNotFoundException(jokeId);
 		}
 	}
+	
+	public static void isJokePresent(long jokeId) {
+		Optional<Joke> jk = jokeRepository.findById(jokeId);
+
+		if (!jk.isPresent()) {
+			throw new JokeNotFoundException(jokeId);
+		}
+	}
 
 	public Joke editJoke(long jokeId, Joke newJoke) {
-		/*jokeRepository.editJoke(newJoke.getJoke(), getJoke(jokeId).getId());
-		return getJoke(jokeId);*/
-		Joke jk = getJoke(jokeId); 
-		jk.setJoke(newJoke.getJoke());;
-		jokeRepository.save(jk);
-		return jk;
+		jokeRepository.editJoke(newJoke.getJoke(), getJoke(jokeId).getId());
+		return getJoke(jokeId);
 	}
 
 	public Joke likeJoke(long jokeId) {
 		jokeRepository.updateLikesFor(getJoke(jokeId).getId());
 		return getJoke(jokeId);
-//		Joke jk = getJoke(jokeId); 
-//		jk.setLikes(jk.getLikes()+1);
-//		jokeRepository.save(jk);
-//		return jk;
 	}
 
 	public Joke dislikeJoke(long jokeId) {
-		/*jokeRepository.updateDislikesFor(getJoke(jokeId).getId());
-		return getJoke(jokeId);*/
-		Joke jk = getJoke(jokeId); 
-		jk.setDislikes(jk.getDislikes()+1);
-		jokeRepository.save(jk);
-		return jk;
+		jokeRepository.updateDislikesFor(getJoke(jokeId).getId());
+		return getJoke(jokeId);
 	}
 
 	public Joke randomJoke() {
@@ -154,6 +158,39 @@ public class JokeService {
 		}else {
 			throw new JokeNotFoundException("Could not find jokes from day "+dateString);
 		}
+	}
+	
+	public static List<Joke> getJokesFromUser(User usr){
+		return jokeRepository.findByAuthor(usr);
+	}
+	
+	public Joke getMostFavorableJoke() {
+		List<Favorite> favs = favoriteRepository.findAll();
+		Map<Long, Integer> counter = new HashMap<>();
+
+		for (Favorite fav : favs) {
+			counter.put(fav.getJoke().getId(), 0);
+		}
+
+		for (Favorite fav : favs) {
+			counter.put(fav.getJoke().getId(), counter.get(fav.getJoke().getId()) + 1);
+		}
+
+		Map.Entry<Long, Integer> first = counter.entrySet().iterator().next();
+		long maxId = first.getKey();
+		int maxCnt = first.getValue();
+		for (Map.Entry<Long, Integer> item : counter.entrySet()) {
+			if (item.getValue() > maxCnt) {
+				maxCnt = item.getValue();
+				maxId = item.getKey();
+			}
+		}
+		
+		return getJoke(maxId);
+	}
+	
+	public List<Joke> getAllFavoritedJokes(){
+		return favoriteRepository.getAllFavoritedJokes();
 	}
 
 }

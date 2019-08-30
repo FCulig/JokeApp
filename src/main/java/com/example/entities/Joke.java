@@ -2,14 +2,11 @@ package com.example.entities;
 
 import java.time.LocalDate;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
@@ -20,12 +17,13 @@ import com.example.services.UserService;
 @Component
 @Table(name = "joke")
 public class Joke {
+	@Column(name = "joke_id")
 	private String joke;
 	private @Id long id;
 	private int likes;
 	private int dislikes;
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "user_id")
 	private User author;
 	private LocalDate timestamp = LocalDate.now();
 

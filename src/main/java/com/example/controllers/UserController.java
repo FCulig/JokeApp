@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entities.Joke;
@@ -39,6 +40,16 @@ public class UserController {
 	public User addUser(@RequestBody User newUser) {
 		return service.addUser(newUser);
 	}
+	
+	@PostMapping("/{id}")
+	public User editUser(@PathVariable("id") long userId, @RequestBody User newUser) {
+		return service.editUser(newUser, userId);
+	}
+	
+	@GetMapping(value = "", params = "username")
+	public List<User> getUserByUsername(@RequestParam String username) {
+		return service.getUserByUsername(username);
+	}
 
 	@DeleteMapping("/{id}")
 	public User deleteUser(@PathVariable("id") long userId) {
@@ -53,5 +64,20 @@ public class UserController {
 	@GetMapping("/{id}/jokes")
 	public List<Joke> getUserJokes(@PathVariable("id") long userId) {
 		return service.getUserJokes(userId);
+	}
+	
+	@PostMapping("/{usrid}/favorite/{jokeid}")
+	public Joke favoriteJoke(@PathVariable("usrid") long userId, @PathVariable("jokeid") long jokeId) {
+		return service.favoriteJoke(userId, jokeId);
+	}
+	
+	@PostMapping("/{usrid}/unfavorite/{jokeid}")
+	public Joke unfavoriteJoke(@PathVariable("usrid") long userId, @PathVariable("jokeid") long jokeId) {
+		return service.unfavoriteJoke(userId, jokeId);
+	}
+	
+	@GetMapping("/{id}/favorites")
+	public List<Joke> getUserFavorites(@PathVariable("id") long userId) {
+		return service.getUserFavorites(userId);
 	}
 }

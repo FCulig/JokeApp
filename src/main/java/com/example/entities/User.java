@@ -11,8 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Table(name = "users")
 public class User {
-	
+	@Column(name = "user_id")
 	private @Id long id;
+	
 	private String username;
 
 	public User(long id, String username) {
@@ -24,6 +25,11 @@ public class User {
 	public User(long id) {
 		super();
 		this.id = id;
+	}
+	
+	public User(String username) {
+		super();
+		this.username = username;
 	}
 
 	public User() {
