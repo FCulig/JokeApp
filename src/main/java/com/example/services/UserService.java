@@ -4,46 +4,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.entities.Favorite;
 import com.example.entities.Joke;
 import com.example.entities.User;
+import com.example.exceptions.BadUserBodyException;
 import com.example.exceptions.FavoriteAlreadyExistsException;
 import com.example.exceptions.FavoriteNotFoundException;
 import com.example.exceptions.UserNotFoundException;
-import com.example.repositories.FavoriteRepository;
+import com.example.exceptions.WrongPathVariableTypeArgumentException;
+import com.example.repositories.JokeRepository;
 import com.example.repositories.UserRepository;
 
 @Service
 public class UserService {
 	private static AtomicLong nextId = new AtomicLong();
-	private static AtomicLong nextIdFav = new AtomicLong();
 
 	@Autowired
 	private static UserRepository userRepository;
 
 	@Autowired
-	private static FavoriteRepository favoriteRepository;
+	private static JokeRepository jokeRepository;
 
 	@Autowired
-	public UserService(UserRepository userRepository, FavoriteRepository favoriteRepository) {
+	public UserService(JokeRepository jokeRepository, UserRepository userRepository) {
 		super();
 		UserService.userRepository = userRepository;
-		UserService.favoriteRepository = favoriteRepository;
+		UserService.jokeRepository = jokeRepository;
 	}
 
 	public User addUser(User newUser) {
+		checkUsername(newUser);
 		newUser.setId(nextId.getAndIncrement());
 		userRepository.save(newUser);
 		return newUser;
 	}
-	
+
 	public User editUser(User newUser, long userId) {
 		isUserPresent(userId);
+		checkUsername(newUser);
 		userRepository.editUser(userId, newUser.getUsername());
 		return getUser(userId);
 	}
@@ -61,13 +64,13 @@ public class UserService {
 			throw new UserNotFoundException(userId);
 		}
 	}
-	
+
 	public List<User> getUserByUsername(String username) {
 		List<User> usr = userRepository.findByUsername(username);
-		
-		if(!usr.isEmpty()) {
+
+		if (!usr.isEmpty()) {
 			return usr;
-		}else {
+		} else {
 			throw new UserNotFoundException(username);
 		}
 	}
@@ -118,37 +121,58 @@ public class UserService {
 	public Joke favoriteJoke(long userId, long jokeId) {
 		JokeService.isJokePresent(jokeId);
 		isUserPresent(userId);
-		isFavoritePresent(userId, jokeId);
-		favoriteRepository.save(new Favorite(nextIdFav.incrementAndGet(), userId, jokeId));
-		return JokeService.getJoke(jokeId);
+
+		User usr = getUser(userId);
+		Joke jk = JokeService.getJoke(jokeId);
+
+		if (usr.getFavoritedJokes().contains(jk)) {
+			throw new FavoriteAlreadyExistsException(getUser(userId));
+		} else {
+			jk.getUsers().add(usr);
+			usr.getFavoritedJokes().add(JokeService.getJoke(jokeId));
+			userRepository.save(usr);
+			jokeRepository.save(jk);
+
+			return JokeService.getJoke(jokeId);
+		}
 	}
 
 	public Joke unfavoriteJoke(long userId, long jokeId) {
 		JokeService.isJokePresent(jokeId);
 		isUserPresent(userId);
-		isNotFavoritePresent(userId, jokeId);
-		favoriteRepository.unfavorite(getUser(userId), JokeService.getJoke(jokeId));
-		return JokeService.getJoke(jokeId);
-	}
 
-	public List<Joke> getUserFavorites(long userId) {
-		isUserPresent(userId);
-		return favoriteRepository.findFavs(getUser(userId));
-	}
+		User usr = getUser(userId);
+		Joke jk = JokeService.getJoke(jokeId);
 
-	public void isFavoritePresent(long userId, long jokeId) {
-		Optional<Favorite> fv = favoriteRepository.getFavorite(getUser(userId), JokeService.getJoke(jokeId));
+		if (usr.getFavoritedJokes().contains(jk)) {
+			jk.getUsers().remove(usr);
+			usr.getFavoritedJokes().remove(JokeService.getJoke(jokeId));
+			userRepository.save(usr);
+			jokeRepository.save(jk);
 
-		if (fv.isPresent()) {
-			throw new FavoriteAlreadyExistsException(getUser(userId));
+			return JokeService.getJoke(jokeId);
+		} else {
+			throw new FavoriteNotFoundException("User did not favorite this joke.");
 		}
 	}
 
-	public void isNotFavoritePresent(long userId, long jokeId) {
-		Optional<Favorite> fv = favoriteRepository.getFavorite(getUser(userId), JokeService.getJoke(jokeId));
-
-		if (!fv.isPresent()) {
-			throw new FavoriteNotFoundException("This joke is not favorited");
+	public Set<Joke> getUserFavorites(long userId) {
+		isUserPresent(userId);
+		return getUser(userId).getFavoritedJokes();
+	}
+	
+	public long convertLongToString(String idString) {
+		try {
+			long id = Long.parseLong(idString);
+			return id;
+		}catch(NumberFormatException e){
+			throw new WrongPathVariableTypeArgumentException("Path variable argument must be int/long");
+		}
+	}
+	
+	public void checkUsername(User usr) {
+		if(usr.getUsername()==null) {
+			throw new BadUserBodyException("Username isnt set");
 		}
 	}
 }

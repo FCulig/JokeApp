@@ -1,6 +1,7 @@
 package com.example.controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,8 +33,8 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
-	public User getUser(@PathVariable("id") long userId) {
-		return UserService.getUser(userId);
+	public User getUser(@PathVariable("id") String idString) {
+		return UserService.getUser(service.convertLongToString(idString));
 	}
 
 	@PostMapping("")
@@ -42,8 +43,8 @@ public class UserController {
 	}
 	
 	@PostMapping("/{id}")
-	public User editUser(@PathVariable("id") long userId, @RequestBody User newUser) {
-		return service.editUser(newUser, userId);
+	public User editUser(@PathVariable("id") String idString, @RequestBody User newUser) {
+		return service.editUser(newUser, service.convertLongToString(idString));
 	}
 	
 	@GetMapping(value = "", params = "username")
@@ -52,8 +53,8 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{id}")
-	public User deleteUser(@PathVariable("id") long userId) {
-		return service.deleteUser(userId);
+	public User deleteUser(@PathVariable("id") String idString) {
+		return service.deleteUser(service.convertLongToString(idString));
 	}
 
 	@GetMapping("/mostactive")
@@ -62,22 +63,22 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}/jokes")
-	public List<Joke> getUserJokes(@PathVariable("id") long userId) {
-		return service.getUserJokes(userId);
+	public List<Joke> getUserJokes(@PathVariable("id") String idString) {
+		return service.getUserJokes(service.convertLongToString(idString));
 	}
 	
 	@PostMapping("/{usrid}/favorite/{jokeid}")
-	public Joke favoriteJoke(@PathVariable("usrid") long userId, @PathVariable("jokeid") long jokeId) {
-		return service.favoriteJoke(userId, jokeId);
+	public Joke favoriteJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.favoriteJoke(service.convertLongToString(userId), service.convertLongToString(jokeId));
 	}
 	
 	@PostMapping("/{usrid}/unfavorite/{jokeid}")
-	public Joke unfavoriteJoke(@PathVariable("usrid") long userId, @PathVariable("jokeid") long jokeId) {
-		return service.unfavoriteJoke(userId, jokeId);
+	public Joke unfavoriteJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.unfavoriteJoke(service.convertLongToString(userId), service.convertLongToString(jokeId));
 	}
 	
 	@GetMapping("/{id}/favorites")
-	public List<Joke> getUserFavorites(@PathVariable("id") long userId) {
-		return service.getUserFavorites(userId);
+	public Set<Joke> getUserFavorites(@PathVariable("id") String idString) {
+		return service.getUserFavorites(service.convertLongToString(idString));
 	}
 }

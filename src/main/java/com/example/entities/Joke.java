@@ -1,11 +1,13 @@
 package com.example.entities;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -27,22 +29,8 @@ public class Joke {
 	private User author;
 	private LocalDate timestamp = LocalDate.now();
 
-	public Joke(String joke, long id, int nmbrLikes, int nmbrDislikes) {
-		super();
-		this.joke = joke;
-		this.id = id;
-		this.likes = nmbrLikes;
-		this.dislikes = nmbrDislikes;
-		this.timestamp = LocalDate.now();
-	}
-
-	public Joke(String joke, int nmbrLikes, int nmbrDislikes) {
-		super();
-		this.joke = joke;
-		this.likes = nmbrLikes;
-		this.dislikes = nmbrDislikes;
-		this.timestamp = LocalDate.now();
-	}
+	@ManyToMany(mappedBy = "favoritedJokes")
+	private Set<User> users;
 
 	public Joke(String joke, long id) {
 		super();
@@ -64,7 +52,7 @@ public class Joke {
 	public Joke(User author, String joke) {
 		super();
 		this.joke = joke;
-		this.author = author;
+		this.author = UserService.getUser(author.getId());
 		this.timestamp = LocalDate.now();
 	}
 
@@ -124,6 +112,22 @@ public class Joke {
 
 	public void setAuthor(User author) {
 		this.author = author;
+	}
+
+	public void addUser(User us) {
+		this.users.add(us);
+	}
+
+	public void removeUser(User us) {
+		this.users.remove(us);
+	}
+
+	public Set<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(Set<User> users) {
+		this.users = users;
 	}
 
 	@Override

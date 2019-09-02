@@ -1,20 +1,34 @@
 package com.example.entities;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Component
 @Table(name = "users")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 	@Column(name = "user_id")
 	private @Id long id;
-	
+
 	private String username;
+
+	@ManyToMany
+	@JoinTable(name = "favorite_jokes", joinColumns = @JoinColumn(name = "joke_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	@JsonBackReference
+	private Set<Joke> favoritedJokes;
 
 	public User(long id, String username) {
 		super();
@@ -26,7 +40,7 @@ public class User {
 		super();
 		this.id = id;
 	}
-	
+
 	public User(String username) {
 		super();
 		this.username = username;
@@ -50,6 +64,22 @@ public class User {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public void addFavorite(Joke jk) {
+		this.favoritedJokes.add(jk);
+	}
+
+	public void removeFavorite(Joke jk) {
+		this.favoritedJokes.remove(jk);
+	}
+
+	public Set<Joke> getFavoritedJokes() {
+		return favoritedJokes;
+	}
+
+	public void setFavoritedJokes(Set<Joke> favoritedJokes) {
+		this.favoritedJokes = favoritedJokes;
 	}
 
 	@Override

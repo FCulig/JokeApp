@@ -1,6 +1,7 @@
 package com.example.controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entities.Joke;
+import com.example.entities.User;
+import com.example.exceptions.WrongPathVariableTypeArgumentException;
 import com.example.services.JokeService;
 
 @RestController
@@ -37,23 +40,23 @@ public class JokeController {
 	}
 
 	@GetMapping("/{id}")
-	public Joke getJoke(@PathVariable("id") long jokeId) {
-		return JokeService.getJoke(jokeId);
+	public Joke getJoke(@PathVariable("id") String jokeIdString) {
+		return JokeService.getJoke(service.convertStringToLong(jokeIdString));
 	}
 
 	@PostMapping("/{id}")
-	public Joke editJoke(@PathVariable("id") long jokeId, @RequestBody Joke newJoke) {
-		return service.editJoke(jokeId, newJoke);
+	public Joke editJoke(@PathVariable("id") String jokeIdString, @RequestBody Joke newJoke) {
+		return service.editJoke(service.convertStringToLong(jokeIdString), newJoke);
 	}
 
 	@PostMapping("/{id}/like")
-	public Joke likeJoke(@PathVariable("id") long jokeId) {
-		return service.likeJoke(jokeId);
+	public Joke likeJoke(@PathVariable("id") String jokeIdString) {
+		return service.likeJoke(service.convertStringToLong(jokeIdString));
 	}
 
 	@PostMapping("/{id}/dislike")
-	public Joke dislikeJoke(@PathVariable("id") long jokeId) {
-		return service.dislikeJoke(jokeId);
+	public Joke dislikeJoke(@PathVariable("id") String jokeIdString) {
+		return service.dislikeJoke(service.convertStringToLong(jokeIdString));
 	}
 
 	@GetMapping("/random")
@@ -67,8 +70,8 @@ public class JokeController {
 	}
 
 	@GetMapping(value = "/best", params = "n")
-	public List<Joke> bestJokes(@RequestParam int n) {
-		return service.topJokes(n);
+	public List<Joke> bestJokes(@RequestParam String n) {
+		return service.topJokes(service.convertStringToInt(n));
 	}
 
 	@GetMapping("/worst")
@@ -78,12 +81,12 @@ public class JokeController {
 
 	@GetMapping(value = "/worst", params = "n")
 	public List<Joke> worstJokes(@RequestParam String n) {
-		return service.worstJokes(Integer.parseInt(n));
+		return service.worstJokes(service.convertStringToInt(n));
 	}
 
 	@DeleteMapping("/{id}")
-	public Joke deleteJoke(@PathVariable("id") long jokeId) {
-		return service.deleteJoke(jokeId);
+	public Joke deleteJoke(@PathVariable("id") String jokeIdString) {
+		return service.deleteJoke(service.convertStringToLong(jokeIdString));
 	}
 
 	@GetMapping("/todayjokes")
@@ -105,16 +108,15 @@ public class JokeController {
 	public Joke getTodaysWorst() {
 		return service.getTodaysWorst();
 	}
-	
+
 	@GetMapping("/mostfavorable")
 	public Joke getMostFavorableJoke() {
 		return service.getMostFavorableJoke();
 	}
-	
-	@GetMapping("/allfavoritedjokes")
-	public List<Joke> getAllFavoritedJokes(){
-		return service.getAllFavoritedJokes();
+
+	@GetMapping("/{id}/whofavorited")
+	public Set<User> getUsersWhoFavorited(@PathVariable("id") String jokeIdString) {
+		return service.getUsersWhoFavorited(service.convertStringToLong(jokeIdString));
 	}
-	
-	
+
 }
