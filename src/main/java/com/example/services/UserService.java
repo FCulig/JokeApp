@@ -175,4 +175,17 @@ public class UserService {
 			throw new BadUserBodyException("Username isnt set");
 		}
 	}
+	
+	public boolean isFavorite(long userId, long jokeId) {
+		isUserPresent(userId);
+		JokeService.isJokePresent(jokeId);
+		
+		for(Joke jk : getUserFavorites(userId)) {
+			if(jk.getId() == jokeId) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

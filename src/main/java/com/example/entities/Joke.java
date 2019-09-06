@@ -49,7 +49,7 @@ public class Joke {
 		this.timestamp = LocalDate.now();
 	}
 
-	public Joke(User author, String joke) {
+	public Joke(String joke, User author) {
 		super();
 		this.joke = joke;
 		this.author = UserService.getUser(author.getId());

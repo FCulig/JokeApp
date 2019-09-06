@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.example.services.UserService;
 
 @RestController
 @RequestMapping("users")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 	private UserService service;
 
@@ -80,5 +82,10 @@ public class UserController {
 	@GetMapping("/{id}/favorites")
 	public Set<Joke> getUserFavorites(@PathVariable("id") String idString) {
 		return service.getUserFavorites(service.convertLongToString(idString));
+	}
+	
+	@GetMapping("/{usrid}/isfavorite/{jokeid}")
+	public boolean isFavorite(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.isFavorite(service.convertLongToString(userId), service.convertLongToString(jokeId));
 	}
 }
