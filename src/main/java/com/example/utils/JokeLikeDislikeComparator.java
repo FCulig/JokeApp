@@ -8,20 +8,20 @@ public class JokeLikeDislikeComparator implements Comparator<Joke>{
 
 	@Override
 	public int compare(Joke o1, Joke o2) {
-		if(o1.getDislikes() == 0 && o2.getDislikes() == 0) {
-			if(o1.getLikes() > o2.getLikes()) {
+		if(o1.getUsersDisliked().size() == 0 && o2.getUsersDisliked().size() == 0) {
+			if(o1.getUsersLiked().size() > o2.getUsersLiked().size()) {
 				return -1;
 			}else {
 				return 1;
 			}
-		}else if(o1.getDislikes() == 0 || o2.getDislikes() == 0) {
-			if(o1.getDislikes() == 0) {
+		}else if(o1.getUsersDisliked().size() == 0 || o2.getUsersDisliked().size() == 0) {
+			if(o1.getUsersLiked().size() == 0) {
 				return -1;
 			}else {
 				return 1;
 			}
 		}else {
-			if(o1.getLikes()/o1.getDislikes() > o2.getLikes()/o2.getDislikes()) {
+			if(o1.getUsersLiked().size()/o1.getUsersDisliked().size() > o2.getUsersLiked().size()/o2.getUsersDisliked().size()) {
 				return -1;
 			}else {
 				return 1;

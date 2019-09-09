@@ -20,16 +20,6 @@ public interface JokeRepository extends JpaRepository<Joke, Long> {
 	public List<Joke> findByTimestamp(LocalDate dateString);
 
 	public List<Joke> findByAuthor(User user);
-	
-	@Transactional
-	@Modifying(clearAutomatically = true)
-	@Query("update Joke j set j.likes = j.likes + 1 where j.id = ?1")
-	public void updateLikesFor(long jokeId);
-	
-	@Transactional
-	@Modifying(clearAutomatically = true)
-	@Query("update Joke j set j.dislikes = j.dislikes + 1 where j.id = ?1")
-	public void updateDislikesFor(long jokeId);
 
 	@Modifying(clearAutomatically = true)
 	@Transactional

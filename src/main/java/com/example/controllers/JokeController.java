@@ -50,16 +50,6 @@ public class JokeController {
 		return service.editJoke(service.convertStringToLong(jokeIdString), newJoke);
 	}
 
-	@PostMapping("/{id}/like")
-	public Joke likeJoke(@PathVariable("id") String jokeIdString) {
-		return service.likeJoke(service.convertStringToLong(jokeIdString));
-	}
-
-	@PostMapping("/{id}/dislike")
-	public Joke dislikeJoke(@PathVariable("id") String jokeIdString) {
-		return service.dislikeJoke(service.convertStringToLong(jokeIdString));
-	}
-
 	@GetMapping("/random")
 	public Joke getRandomJoke() {
 		return service.randomJoke();
@@ -117,7 +107,16 @@ public class JokeController {
 
 	@GetMapping("/{id}/whofavorited")
 	public Set<User> getUsersWhoFavorited(@PathVariable("id") String jokeIdString) {
-		return service.getUsersWhoFavorited(service.convertStringToLong(jokeIdString));
+		return JokeService.getUsersWhoFavorited(service.convertStringToLong(jokeIdString));
 	}
-
+	
+	@GetMapping("/{id}/wholiked")
+	public Set<User> getUsersWhoLiked(@PathVariable("id") String jokeIdString) {
+		return JokeService.getUsersWhoLiked(service.convertStringToLong(jokeIdString));
+	}
+	
+	@GetMapping("/{id}/whodisliked")
+	public Set<User> getUsersWhoDisliked(@PathVariable("id") String jokeIdString) {
+		return JokeService.getUsersWhoDisliked(service.convertStringToLong(jokeIdString));
+	}
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +14,7 @@ import com.example.entities.User;
 import com.example.exceptions.BadUserBodyException;
 import com.example.exceptions.FavoriteAlreadyExistsException;
 import com.example.exceptions.FavoriteNotFoundException;
+import com.example.exceptions.UserAlreadyReacted;
 import com.example.exceptions.UserNotFoundException;
 import com.example.exceptions.WrongPathVariableTypeArgumentException;
 import com.example.repositories.JokeRepository;
@@ -22,7 +22,6 @@ import com.example.repositories.UserRepository;
 
 @Service
 public class UserService {
-	private static AtomicLong nextId = new AtomicLong();
 
 	@Autowired
 	private static UserRepository userRepository;
@@ -39,7 +38,6 @@ public class UserService {
 
 	public User addUser(User newUser) {
 		checkUsername(newUser);
-		newUser.setId(nextId.getAndIncrement());
 		userRepository.save(newUser);
 		return newUser;
 	}
@@ -156,36 +154,101 @@ public class UserService {
 		}
 	}
 
+	public Joke likeJoke(long userId, long jokeId) {
+		JokeService.isJokePresent(jokeId);
+		isUserPresent(userId);
+		
+		User usr = getUser(userId);
+		Joke jk = JokeService.getJoke(jokeId);
+
+		if(usr.getLikedJokes().contains(jk)) {
+			throw new UserAlreadyReacted("User already liked this joke");
+		}else {
+			if(usr.getDislikedJokes().contains(jk)) {
+				usr.getDislikedJokes().remove(jk);
+				jk.getUsersDisliked().remove(usr);
+			}
+			
+			jk.getUsersLiked().add(usr);
+			usr.getLikedJokes().add(JokeService.getJoke(jokeId));
+			
+			userRepository.save(usr);
+			jokeRepository.save(jk);
+
+			return JokeService.getJoke(jokeId);
+		}
+	}
+
+	public Joke dislikeJoke(long userId, long jokeId) {
+		JokeService.isJokePresent(jokeId);
+		isUserPresent(userId);
+		
+		User usr = getUser(userId);
+		Joke jk = JokeService.getJoke(jokeId);
+		
+		if(usr.getDislikedJokes().contains(jk)) {
+			throw new UserAlreadyReacted("User already disliked this joke");
+		}else {
+			if(usr.getLikedJokes().contains(jk)) {
+				usr.getLikedJokes().remove(jk);
+				jk.getUsersLiked().remove(usr);
+			}
+			
+			jk.getUsersDisliked().add(usr);
+			usr.getDislikedJokes().add(JokeService.getJoke(jokeId));
+			
+			userRepository.save(usr);
+			jokeRepository.save(jk);
+
+			return JokeService.getJoke(jokeId);
+		}
+	}
+
 	public Set<Joke> getUserFavorites(long userId) {
 		isUserPresent(userId);
 		return getUser(userId).getFavoritedJokes();
 	}
-	
-	public long convertLongToString(String idString) {
+
+	public long convertStringToLong(String idString) {
 		try {
 			long id = Long.parseLong(idString);
 			return id;
-		}catch(NumberFormatException e){
+		} catch (NumberFormatException e) {
 			throw new WrongPathVariableTypeArgumentException("Path variable argument must be int/long");
 		}
 	}
-	
+
 	public void checkUsername(User usr) {
-		if(usr.getUsername()==null) {
+		if (usr.getUsername() == null) {
 			throw new BadUserBodyException("Username isnt set");
 		}
 	}
-	
+
 	public boolean isFavorite(long userId, long jokeId) {
 		isUserPresent(userId);
 		JokeService.isJokePresent(jokeId);
-		
-		for(Joke jk : getUserFavorites(userId)) {
-			if(jk.getId() == jokeId) {
+
+		for (Joke jk : getUserFavorites(userId)) {
+			if (jk.getId() == jokeId) {
 				return true;
 			}
 		}
-		
+
 		return false;
+	}
+
+	public int getCountOfFavoritedJokes(long userId) {
+		isUserPresent(userId);
+		List<Joke> usersJokes = getUserJokes(userId);
+		int cnt = 0;
+
+		for (Joke jk : usersJokes) {
+			try {
+				cnt = cnt + JokeService.getUsersWhoFavorited(jk.getId()).size();
+			} catch (Exception e) {
+			}
+		}
+
+		return cnt;
 	}
 }

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +16,7 @@ import com.example.entities.User;
 import com.example.exceptions.BadJokeBodyException;
 import com.example.exceptions.FavoriteNotFoundException;
 import com.example.exceptions.JokeNotFoundException;
+import com.example.exceptions.NoReactionsFoundException;
 import com.example.exceptions.NotEnoughJokesException;
 import com.example.exceptions.WrongDateFormatException;
 import com.example.exceptions.WrongPathVariableTypeArgumentException;
@@ -26,7 +25,6 @@ import com.example.utils.JokeLikeDislikeComparator;
 
 @Service
 public class JokeService {
-	private AtomicLong nextId = new AtomicLong();
 
 	@Autowired
 	private static JokeRepository jokeRepository;
@@ -39,7 +37,6 @@ public class JokeService {
 
 	public Joke addJoke(Joke newJoke) {
 		checkJokeBody(newJoke);
-		newJoke.setId(nextId.getAndIncrement());
 		newJoke.setAuthor(UserService.getUser(newJoke.getAuthor().getId()));
 		jokeRepository.save(newJoke);
 		return newJoke;
@@ -58,7 +55,7 @@ public class JokeService {
 			throw new JokeNotFoundException(jokeId);
 		}
 	}
-	
+
 	public static void isJokePresent(long jokeId) {
 		Optional<Joke> jk = jokeRepository.findById(jokeId);
 
@@ -70,16 +67,6 @@ public class JokeService {
 	public Joke editJoke(long jokeId, Joke newJoke) {
 		checkOnlyJokeBody(newJoke);
 		jokeRepository.editJoke(newJoke.getJoke(), getJoke(jokeId).getId());
-		return getJoke(jokeId);
-	}
-
-	public Joke likeJoke(long jokeId) {
-		jokeRepository.updateLikesFor(getJoke(jokeId).getId());
-		return getJoke(jokeId);
-	}
-
-	public Joke dislikeJoke(long jokeId) {
-		jokeRepository.updateDislikesFor(getJoke(jokeId).getId());
 		return getJoke(jokeId);
 	}
 
@@ -135,9 +122,9 @@ public class JokeService {
 
 	public List<Joke> getTodaysJokes() {
 		List<Joke> todays = jokeRepository.findByTimestamp(LocalDate.now());
-		if(todays.isEmpty()) {
+		if (todays.isEmpty()) {
 			throw new JokeNotFoundException("There are no jokes from today!");
-		}else {
+		} else {
 			return todays;
 		}
 	}
@@ -158,84 +145,102 @@ public class JokeService {
 	public List<Joke> getJokesAtDate(String dateString) {
 		try {
 			List<Joke> jokesAtDay = jokeRepository.findByTimestamp(LocalDate.parse(dateString));
-			if(!jokesAtDay.isEmpty()) {
+			if (!jokesAtDay.isEmpty()) {
 				return jokesAtDay;
-			}else {
-				throw new JokeNotFoundException("Could not find jokes from day "+dateString);
+			} else {
+				throw new JokeNotFoundException("Could not find jokes from day " + dateString);
 			}
 		} catch (DateTimeParseException e) {
 			throw new WrongDateFormatException("Wrong format of date entered");
 		}
 	}
-	
-	public static List<Joke> getJokesFromUser(User usr){
+
+	public static List<Joke> getJokesFromUser(User usr) {
 		return jokeRepository.findByAuthor(usr);
 	}
-	
+
 	public Joke getMostFavorableJoke() {
 		List<Joke> allJokes = jokeRepository.findAll();
-		
+
 		long maxId = 0, maxCnt = 0;
-		
-		for(Joke jk : allJokes) {
-			if(jk.getUsers().size() > maxCnt) {
+
+		for (Joke jk : allJokes) {
+			if (jk.getUsers().size() > maxCnt) {
 				maxCnt = jk.getUsers().size();
 				maxId = jk.getId();
 			}
 		}
-		
+
 		return getJoke(maxId);
 	}
-	
-	public Set<User> getUsersWhoFavorited(long jokeId){
+
+	public static Set<User> getUsersWhoFavorited(long jokeId) {
 		Set<User> users = getJoke(jokeId).getUsers();
-		
-		if(users.isEmpty()) {
+
+		if (users.isEmpty()) {
 			throw new FavoriteNotFoundException("Nobody favorited this joke.");
-		}else {
+		} else {
 			return users;
 		}
-		
+
 	}
-	
+
 	public void checkOnlyJokeBody(Joke jk) {
-		if(jk.getJoke()==null) {
+		if (jk.getJoke() == null) {
 			throw new BadJokeBodyException("There is no joke sent");
 		}
 	}
-	
+
 	public void checkJokeBody(Joke jk) {
 		checkOnlyJokeBody(jk);
-		if(jk.getAuthor()==null) {
+		if (jk.getAuthor() == null) {
 			throw new BadJokeBodyException("There is no author to this joke");
 		}
 	}
-	
+
 	public long convertStringToLong(String idString) {
 		try {
 			long id = Long.parseLong(idString);
 			return id;
-		}catch(NumberFormatException e){
+		} catch (NumberFormatException e) {
 			throw new WrongPathVariableTypeArgumentException("Path variable argument must be int/long");
 		}
 	}
-	
+
 	public int convertStringToInt(String intString) {
 		try {
 			int n = Integer.parseInt(intString);
 			return n;
-		}catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new WrongPathVariableTypeArgumentException("Path variable must be int");
 		}
 	}
 
 	public void checkIsEnoughJokes(int n) {
 		try {
-			if(n > jokeRepository.findAll().size()) {
+			if (n > jokeRepository.findAll().size()) {
 				throw new NotEnoughJokesException("You requested more jokes than there is");
 			}
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotEnoughJokesException("You requested more jokes than there is");
 		}
+	}
+
+	public static Set<User> getUsersWhoLiked(long jokeId){
+		/*if(getJoke(jokeId).getUsersLiked().size()>0) {
+			return getJoke(jokeId).getUsersLiked();
+		}else {
+			throw new NoReactionsFoundException("Nobody liked this joke");
+		}*/
+		return getJoke(jokeId).getUsersLiked();
+	}
+	
+	public static Set<User> getUsersWhoDisliked(long jokeId){
+		/*if(getJoke(jokeId).getUsersDisliked().size()>0) {
+			return getJoke(jokeId).getUsersDisliked();
+		}else {
+			throw new NoReactionsFoundException("Nobody disliked this joke");
+		}*/
+		return getJoke(jokeId).getUsersDisliked();
 	}
 }

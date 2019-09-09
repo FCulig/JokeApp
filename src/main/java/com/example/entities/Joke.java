@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
@@ -14,38 +16,45 @@ import javax.persistence.Table;
 import org.springframework.stereotype.Component;
 
 import com.example.services.UserService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Component
 @Table(name = "joke")
 public class Joke {
-	@Column(name = "joke_id")
+	private LocalDate timestamp = LocalDate.now();
 	private String joke;
+	
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "joke_id")
 	private @Id long id;
-	private int likes;
-	private int dislikes;
+	
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "user_id")
 	private User author;
-	private LocalDate timestamp = LocalDate.now();
-
+	
 	@ManyToMany(mappedBy = "favoritedJokes")
+	@JsonIgnore
 	private Set<User> users;
+	
+	@ManyToMany(mappedBy = "likedJokes")
+	@JsonIgnore
+	private Set<User> usersLiked;
+	
+	@ManyToMany(mappedBy = "dislikedJokes")
+	@JsonIgnore
+	private Set<User> usersDisliked;
 
 	public Joke(String joke, long id) {
 		super();
 		this.joke = joke;
 		this.id = id;
-		this.likes = 0;
-		this.dislikes = 0;
 		this.timestamp = LocalDate.now();
 	}
 
 	public Joke(String joke) {
 		super();
 		this.joke = joke;
-		this.likes = 0;
-		this.dislikes = 0;
 		this.timestamp = LocalDate.now();
 	}
 
@@ -90,22 +99,6 @@ public class Joke {
 		this.id = id;
 	}
 
-	public int getLikes() {
-		return likes;
-	}
-
-	public void setLikes(int nmbrLikes) {
-		this.likes = nmbrLikes;
-	}
-
-	public int getDislikes() {
-		return dislikes;
-	}
-
-	public void setDislikes(int nmbrDislikes) {
-		this.dislikes = nmbrDislikes;
-	}
-
 	public User getAuthor() {
 		return author;
 	}
@@ -129,11 +122,28 @@ public class Joke {
 	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
+	
+	public Set<User> getUsersLiked() {
+		return usersLiked;
+	}
+
+	public void setUsersLiked(Set<User> usersLiked) {
+		this.usersLiked = usersLiked;
+	}
+
+	public Set<User> getUsersDisliked() {
+		return usersDisliked;
+	}
+
+	public void setUsersDisliked(Set<User> usersDisliked) {
+		this.usersDisliked = usersDisliked;
+	}
 
 	@Override
 	public String toString() {
-		return "Joke [joke=" + joke + ", id=" + id + ", likes=" + likes + ", dislikes=" + dislikes + ", author="
-				+ author + ", timestamp=" + timestamp + "]";
+		return "Joke [joke=" + joke + ", id=" + id + ", author=" + author + 
+				", timestamp=" + timestamp + ", users="
+				+ users + ", usersLiked=" + usersLiked + ", usersDisliked=" + 
+				usersDisliked + "]";
 	}
-
 }

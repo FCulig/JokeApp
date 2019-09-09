@@ -36,7 +36,7 @@ public class UserController {
 
 	@GetMapping("/{id}")
 	public User getUser(@PathVariable("id") String idString) {
-		return UserService.getUser(service.convertLongToString(idString));
+		return UserService.getUser(service.convertStringToLong(idString));
 	}
 
 	@PostMapping("")
@@ -46,7 +46,7 @@ public class UserController {
 	
 	@PostMapping("/{id}")
 	public User editUser(@PathVariable("id") String idString, @RequestBody User newUser) {
-		return service.editUser(newUser, service.convertLongToString(idString));
+		return service.editUser(newUser, service.convertStringToLong(idString));
 	}
 	
 	@GetMapping(value = "", params = "username")
@@ -56,7 +56,7 @@ public class UserController {
 
 	@DeleteMapping("/{id}")
 	public User deleteUser(@PathVariable("id") String idString) {
-		return service.deleteUser(service.convertLongToString(idString));
+		return service.deleteUser(service.convertStringToLong(idString));
 	}
 
 	@GetMapping("/mostactive")
@@ -66,26 +66,41 @@ public class UserController {
 
 	@GetMapping("/{id}/jokes")
 	public List<Joke> getUserJokes(@PathVariable("id") String idString) {
-		return service.getUserJokes(service.convertLongToString(idString));
+		return service.getUserJokes(service.convertStringToLong(idString));
 	}
 	
 	@PostMapping("/{usrid}/favorite/{jokeid}")
 	public Joke favoriteJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
-		return service.favoriteJoke(service.convertLongToString(userId), service.convertLongToString(jokeId));
+		return service.favoriteJoke(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
 	}
 	
 	@PostMapping("/{usrid}/unfavorite/{jokeid}")
 	public Joke unfavoriteJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
-		return service.unfavoriteJoke(service.convertLongToString(userId), service.convertLongToString(jokeId));
+		return service.unfavoriteJoke(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
+	}
+	
+	@PostMapping("/{usrid}/like/{jokeid}")
+	public Joke likeJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId){
+		return service.likeJoke(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
+	}
+
+	@PostMapping("/{usrid}/dislike/{jokeid}")
+	public Joke dislikeJoke(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.dislikeJoke(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
 	}
 	
 	@GetMapping("/{id}/favorites")
 	public Set<Joke> getUserFavorites(@PathVariable("id") String idString) {
-		return service.getUserFavorites(service.convertLongToString(idString));
+		return service.getUserFavorites(service.convertStringToLong(idString));
 	}
 	
 	@GetMapping("/{usrid}/isfavorite/{jokeid}")
 	public boolean isFavorite(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
-		return service.isFavorite(service.convertLongToString(userId), service.convertLongToString(jokeId));
+		return service.isFavorite(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
+	}
+	
+	@GetMapping("/{id}/favoritedjokecount")
+	public int getCountOfFavoritedJokes(@PathVariable("id") String userId) {
+		return service.getCountOfFavoritedJokes(service.convertStringToLong(userId));
 	}
 }

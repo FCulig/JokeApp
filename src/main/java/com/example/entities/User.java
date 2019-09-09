@@ -4,6 +4,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -12,7 +14,7 @@ import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -21,14 +23,26 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 	@Column(name = "user_id")
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private @Id long id;
-
 	private String username;
 
 	@ManyToMany
 	@JoinTable(name = "favorite_jokes", joinColumns = @JoinColumn(name = "joke_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	@JsonBackReference
+	@JsonIgnore
 	private Set<Joke> favoritedJokes;
+
+	@ManyToMany
+	@JoinTable(name = "liked_jokes", 
+	joinColumns = @JoinColumn(name = "joke_id"), 
+	inverseJoinColumns = @JoinColumn(name = "user_id"))
+	@JsonIgnore
+	private Set<Joke> likedJokes;
+
+	@ManyToMany
+	@JoinTable(name = "disliked_jokes", joinColumns = @JoinColumn(name = "joke_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	@JsonIgnore
+	private Set<Joke> dislikedJokes;
 
 	public User(long id, String username) {
 		super();
@@ -82,8 +96,25 @@ public class User {
 		this.favoritedJokes = favoritedJokes;
 	}
 
+	public Set<Joke> getLikedJokes() {
+		return likedJokes;
+	}
+
+	public void setLikedJokes(Set<Joke> likedJokes) {
+		this.likedJokes = likedJokes;
+	}
+
+	public Set<Joke> getDislikedJokes() {
+		return dislikedJokes;
+	}
+
+	public void setDislikedJokes(Set<Joke> dislikedJokes) {
+		this.dislikedJokes = dislikedJokes;
+	}
+
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", username=" + username + "]";
+		return "User [id=" + id + ", username=" + username + ", favoritedJokes=" + favoritedJokes + ", likedJokes="
+				+ likedJokes + ", dislikedJokes=" + dislikedJokes + "]";
 	}
 }
