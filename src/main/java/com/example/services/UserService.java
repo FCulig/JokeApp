@@ -63,7 +63,7 @@ public class UserService {
 		}
 	}
 
-	public List<User> getUserByUsername(String username) {
+	/*public List<User> getUserByUsername(String username) {
 		List<User> usr = userRepository.findByUsername(username);
 
 		if (!usr.isEmpty()) {
@@ -71,7 +71,7 @@ public class UserService {
 		} else {
 			throw new UserNotFoundException(username);
 		}
-	}
+	}*/
 
 	public User getMostActiveUser() {
 		List<Joke> jokes = JokeService.getAll();
@@ -157,21 +157,21 @@ public class UserService {
 	public Joke likeJoke(long userId, long jokeId) {
 		JokeService.isJokePresent(jokeId);
 		isUserPresent(userId);
-		
+
 		User usr = getUser(userId);
 		Joke jk = JokeService.getJoke(jokeId);
 
-		if(usr.getLikedJokes().contains(jk)) {
+		if (usr.getLikedJokes().contains(jk)) {
 			throw new UserAlreadyReacted("User already liked this joke");
-		}else {
-			if(usr.getDislikedJokes().contains(jk)) {
+		} else {
+			if (usr.getDislikedJokes().contains(jk)) {
 				usr.getDislikedJokes().remove(jk);
 				jk.getUsersDisliked().remove(usr);
 			}
-			
+
 			jk.getUsersLiked().add(usr);
 			usr.getLikedJokes().add(JokeService.getJoke(jokeId));
-			
+
 			userRepository.save(usr);
 			jokeRepository.save(jk);
 
@@ -182,21 +182,21 @@ public class UserService {
 	public Joke dislikeJoke(long userId, long jokeId) {
 		JokeService.isJokePresent(jokeId);
 		isUserPresent(userId);
-		
+
 		User usr = getUser(userId);
 		Joke jk = JokeService.getJoke(jokeId);
-		
-		if(usr.getDislikedJokes().contains(jk)) {
+
+		if (usr.getDislikedJokes().contains(jk)) {
 			throw new UserAlreadyReacted("User already disliked this joke");
-		}else {
-			if(usr.getLikedJokes().contains(jk)) {
+		} else {
+			if (usr.getLikedJokes().contains(jk)) {
 				usr.getLikedJokes().remove(jk);
 				jk.getUsersLiked().remove(usr);
 			}
-			
+
 			jk.getUsersDisliked().add(usr);
 			usr.getDislikedJokes().add(JokeService.getJoke(jokeId));
-			
+
 			userRepository.save(usr);
 			jokeRepository.save(jk);
 
@@ -250,5 +250,19 @@ public class UserService {
 		}
 
 		return cnt;
+	}
+
+	public Set<Joke> getLikedJokes(long userId) {
+		isUserPresent(userId);
+		return getUser(userId).getLikedJokes();
+	}
+
+	public Set<Joke> getDislikedJokes(long userId) {
+		isUserPresent(userId);
+		return getUser(userId).getDislikedJokes();
+	}
+	
+	public User findByUsername(String username) {
+		return userRepository.findByUsername(username);
 	}
 }

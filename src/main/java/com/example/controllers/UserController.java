@@ -49,10 +49,10 @@ public class UserController {
 		return service.editUser(newUser, service.convertStringToLong(idString));
 	}
 	
-	@GetMapping(value = "", params = "username")
+	/*@GetMapping(value = "", params = "username")
 	public List<User> getUserByUsername(@RequestParam String username) {
 		return service.getUserByUsername(username);
-	}
+	}*/
 
 	@DeleteMapping("/{id}")
 	public User deleteUser(@PathVariable("id") String idString) {
@@ -102,5 +102,15 @@ public class UserController {
 	@GetMapping("/{id}/favoritedjokecount")
 	public int getCountOfFavoritedJokes(@PathVariable("id") String userId) {
 		return service.getCountOfFavoritedJokes(service.convertStringToLong(userId));
+	}
+	
+	@GetMapping("/{id}/liked")
+	public Set<Joke> getLikedJokes(@PathVariable("id") String userId) {
+		return service.getLikedJokes(service.convertStringToLong(userId));
+	}
+	
+	@GetMapping("/{id}/disliked")
+	public Set<Joke> getDislikedJokes(@PathVariable("id") String userId) {
+		return service.getDislikedJokes(service.convertStringToLong(userId));
 	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,6 @@ import com.example.entities.User;
 import com.example.exceptions.BadJokeBodyException;
 import com.example.exceptions.FavoriteNotFoundException;
 import com.example.exceptions.JokeNotFoundException;
-import com.example.exceptions.NoReactionsFoundException;
 import com.example.exceptions.NotEnoughJokesException;
 import com.example.exceptions.WrongDateFormatException;
 import com.example.exceptions.WrongPathVariableTypeArgumentException;

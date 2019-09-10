@@ -16,7 +16,7 @@ import com.example.entities.User;
 @CrossOrigin(origins = "http://localhost:4200")
 public interface UserRepository extends JpaRepository<User, Long> {
 	
-	public List<User> findByUsername(String username);
+	public User findByUsername(String username);
 	
 	@Modifying(clearAutomatically = true)
 	@Transactional

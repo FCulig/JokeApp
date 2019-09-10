@@ -26,7 +26,8 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private @Id long id;
 	private String username;
-
+	private String password;
+	
 	@ManyToMany
 	@JoinTable(name = "favorite_jokes", joinColumns = @JoinColumn(name = "joke_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
 	@JsonIgnore
@@ -48,6 +49,13 @@ public class User {
 		super();
 		this.id = id;
 		this.username = username;
+	}
+	
+	public User(long id, String username, String password) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.password = password;
 	}
 
 	public User(long id) {
@@ -110,6 +118,14 @@ public class User {
 
 	public void setDislikedJokes(Set<Joke> dislikedJokes) {
 		this.dislikedJokes = dislikedJokes;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	@Override
