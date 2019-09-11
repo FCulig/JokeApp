@@ -44,6 +44,8 @@ public class User {
 	@JoinTable(name = "disliked_jokes", joinColumns = @JoinColumn(name = "joke_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
 	@JsonIgnore
 	private Set<Joke> dislikedJokes;
+	
+	
 
 	public User(long id, String username) {
 		super();
@@ -70,6 +72,11 @@ public class User {
 
 	public User() {
 
+	}
+
+	public User(String username, String password) {
+		this.username = username;
+		this.password = password;
 	}
 
 	public long getId() {

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.entities.Joke;
@@ -38,6 +39,8 @@ public class UserService {
 
 	public User addUser(User newUser) {
 		checkUsername(newUser);
+		checkPassword(newUser);
+		newUser.setPassword(new BCryptPasswordEncoder().encode(newUser.getPassword()));
 		userRepository.save(newUser);
 		return newUser;
 	}
@@ -63,15 +66,13 @@ public class UserService {
 		}
 	}
 
-	/*public List<User> getUserByUsername(String username) {
-		List<User> usr = userRepository.findByUsername(username);
-
-		if (!usr.isEmpty()) {
-			return usr;
-		} else {
-			throw new UserNotFoundException(username);
-		}
-	}*/
+	/*
+	 * public List<User> getUserByUsername(String username) { List<User> usr =
+	 * userRepository.findByUsername(username);
+	 * 
+	 * if (!usr.isEmpty()) { return usr; } else { throw new
+	 * UserNotFoundException(username); } }
+	 */
 
 	public User getMostActiveUser() {
 		List<Joke> jokes = JokeService.getAll();
@@ -223,6 +224,12 @@ public class UserService {
 			throw new BadUserBodyException("Username isnt set");
 		}
 	}
+	
+	public void checkPassword(User usr) {
+		if(usr.getPassword() == null) {
+			throw new BadUserBodyException("Password isnt set");
+		}
+	}
 
 	public boolean isFavorite(long userId, long jokeId) {
 		isUserPresent(userId);
@@ -262,7 +269,4 @@ public class UserService {
 		return getUser(userId).getDislikedJokes();
 	}
 	
-	public User findByUsername(String username) {
-		return userRepository.findByUsername(username);
-	}
 }
