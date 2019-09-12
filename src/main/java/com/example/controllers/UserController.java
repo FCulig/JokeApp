@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entities.Joke;
@@ -48,10 +49,10 @@ public class UserController {
 		return service.editUser(newUser, service.convertStringToLong(idString));
 	}
 	
-	/*@GetMapping(value = "", params = "username")
-	public List<User> getUserByUsername(@RequestParam String username) {
+	@GetMapping(value = "/search", params = "username")
+	public User getUserByUsername(@RequestParam String username) {
 		return service.getUserByUsername(username);
-	}*/
+	}
 
 	@DeleteMapping("/{id}")
 	public User deleteUser(@PathVariable("id") String idString) {

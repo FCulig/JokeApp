@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @Configuration
 @EnableWebSecurity
@@ -33,18 +34,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		http.headers().frameOptions().disable();
 	    http
 	    .csrf().disable()
-	    .exceptionHandling()
-	    .and()
 	    .authorizeRequests()
+	    .antMatchers("/login").permitAll()
 	    .antMatchers(HttpMethod.POST,"/users").permitAll()
-	    .antMatchers("/users/authenticate").permitAll()
 	    .antMatchers("/h2-console/**").permitAll()
 	    .antMatchers("/**").authenticated()
+	    /*.and()
+	    .formLogin().defaultSuccessUrl("/jokes", true)
 	    .and()
-	    /*.formLogin().defaultSuccessUrl("/jokes", true)
-	    .and()*/
-	    .logout();
+	    .logout()*/
+	    .and()
+	    .cors()
+	    .and()
+	    .httpBasic();
 	}
+	
+	
 	 
 	@Bean
 	public PasswordEncoder  encoder() {

@@ -66,13 +66,15 @@ public class UserService {
 		}
 	}
 
-	/*
-	 * public List<User> getUserByUsername(String username) { List<User> usr =
-	 * userRepository.findByUsername(username);
-	 * 
-	 * if (!usr.isEmpty()) { return usr; } else { throw new
-	 * UserNotFoundException(username); } }
-	 */
+	public User getUserByUsername(String username) {
+		User usr = userRepository.findByUsername(username);
+
+		if (usr != null) {
+			return usr;
+		} else {
+			throw new UserNotFoundException(username);
+		}
+	}
 
 	public User getMostActiveUser() {
 		List<Joke> jokes = JokeService.getAll();
@@ -110,7 +112,7 @@ public class UserService {
 		return JokeService.getJokesFromUser(getUser(userId));
 	}
 
-	public void isUserPresent(long userId) {
+	public static void isUserPresent(long userId) {
 		Optional<User> usr = userRepository.findById(userId);
 		if (!usr.isPresent()) {
 			throw new UserNotFoundException(userId);
@@ -224,9 +226,9 @@ public class UserService {
 			throw new BadUserBodyException("Username isnt set");
 		}
 	}
-	
+
 	public void checkPassword(User usr) {
-		if(usr.getPassword() == null) {
+		if (usr.getPassword() == null) {
 			throw new BadUserBodyException("Password isnt set");
 		}
 	}
@@ -268,5 +270,5 @@ public class UserService {
 		isUserPresent(userId);
 		return getUser(userId).getDislikedJokes();
 	}
-	
+
 }
