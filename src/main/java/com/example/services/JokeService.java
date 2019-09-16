@@ -39,7 +39,7 @@ public class JokeService {
 		checkJokeBody(newJoke);
 		newJoke.setAuthor(UserService.getUser(newJoke.getAuthor().getId()));
 		jokeRepository.save(newJoke);
-		return newJoke;
+		return getJoke(newJoke.getId());
 	}
 
 	public static List<Joke> getAll() {

@@ -24,23 +24,25 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Joke {
 	private LocalDate timestamp = LocalDate.now();
 	private String joke;
-	
+	private int likes;
+	private int dislikes;
+
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "joke_id")
 	private @Id long id;
-	
+
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "user_id")
 	private User author;
-	
+
 	@ManyToMany(mappedBy = "favoritedJokes")
 	@JsonIgnore
 	private Set<User> users;
-	
+
 	@ManyToMany(mappedBy = "likedJokes")
 	@JsonIgnore
 	private Set<User> usersLiked;
-	
+
 	@ManyToMany(mappedBy = "dislikedJokes")
 	@JsonIgnore
 	private Set<User> usersDisliked;
@@ -122,7 +124,7 @@ public class Joke {
 	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
-	
+
 	public Set<User> getUsersLiked() {
 		return usersLiked;
 	}
@@ -139,11 +141,27 @@ public class Joke {
 		this.usersDisliked = usersDisliked;
 	}
 
+	public int getLikes() {
+		return this.likes;
+	}
+
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
+
+	public int getDislikes() {
+		return this.dislikes;
+	}
+
+	public void setDislikes(int dislikes) {
+		this.dislikes = dislikes;
+	}
+
 	@Override
 	public String toString() {
-		return "Joke [joke=" + joke + ", id=" + id + ", author=" + author + 
-				", timestamp=" + timestamp + ", users="
-				+ users + ", usersLiked=" + usersLiked + ", usersDisliked=" + 
-				usersDisliked + "]";
+		return "Joke [timestamp=" + timestamp + ", joke=" + joke + ", likes=" + likes + ", dislikes=" + dislikes
+				+ ", id=" + id + ", author=" + author + ", users=" + users + ", usersLiked=" + usersLiked
+				+ ", usersDisliked=" + usersDisliked + "]";
 	}
+
 }

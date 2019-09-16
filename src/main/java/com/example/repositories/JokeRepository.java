@@ -25,4 +25,14 @@ public interface JokeRepository extends JpaRepository<Joke, Long> {
 	@Transactional
 	@Query("update Joke j set j.joke = ?1 where j.id = ?2")
 	public void editJoke(String newJoke, long jokeId);
+	
+	@Modifying(clearAutomatically = true)
+	@Transactional
+	@Query("update Joke j set j.likes = j.likes + 1 where j.id = ?1")
+	public void like(long jokeId);
+	
+	@Modifying(clearAutomatically = true)
+	@Transactional
+	@Query("update Joke j set j.dislikes = j.dislikes + 1 where j.id = ?1")
+	public void dislike(long jokeId);
 }

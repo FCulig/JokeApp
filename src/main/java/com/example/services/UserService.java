@@ -177,6 +177,8 @@ public class UserService {
 
 			userRepository.save(usr);
 			jokeRepository.save(jk);
+			
+			jokeRepository.like(jokeId);
 
 			return JokeService.getJoke(jokeId);
 		}
@@ -202,6 +204,8 @@ public class UserService {
 
 			userRepository.save(usr);
 			jokeRepository.save(jk);
+			
+			jokeRepository.dislike(jokeId);
 
 			return JokeService.getJoke(jokeId);
 		}
