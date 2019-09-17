@@ -142,7 +142,7 @@ public class Joke {
 	}
 
 	public int getLikes() {
-		return this.likes;
+		return this.getUsersLiked().size();
 	}
 
 	public void setLikes(int likes) {
@@ -150,7 +150,7 @@ public class Joke {
 	}
 
 	public int getDislikes() {
-		return this.dislikes;
+		return this.getUsersDisliked().size();
 	}
 
 	public void setDislikes(int dislikes) {

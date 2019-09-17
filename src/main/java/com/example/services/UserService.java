@@ -174,7 +174,7 @@ public class UserService {
 
 			jk.getUsersLiked().add(usr);
 			usr.getLikedJokes().add(JokeService.getJoke(jokeId));
-
+			
 			userRepository.save(usr);
 			jokeRepository.save(jk);
 			
@@ -275,4 +275,31 @@ public class UserService {
 		return getUser(userId).getDislikedJokes();
 	}
 
+	public boolean isLiked(long userId, long jokeId) {
+		isUserPresent(userId);
+		Joke joke = JokeService.getJoke(jokeId);
+		
+		for(Joke jk : getLikedJokes(userId)) {
+			if (jk.equals(joke)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isDisliked(long userId, long jokeId) {
+		isUserPresent(userId);
+		Joke joke = JokeService.getJoke(jokeId);
+		
+		for(Joke jk : getDislikedJokes(userId)) {
+			if (jk.equals(joke)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
 }

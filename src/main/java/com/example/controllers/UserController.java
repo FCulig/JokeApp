@@ -113,4 +113,14 @@ public class UserController {
 	public Set<Joke> getDislikedJokes(@PathVariable("id") String userId) {
 		return service.getDislikedJokes(service.convertStringToLong(userId));
 	}
+	
+	@GetMapping("/{usrid}/isliked/{jokeid}")
+	public boolean isLiked(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.isLiked(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
+	}
+	
+	@GetMapping("/{usrid}/isdisliked/{jokeid}")
+	public boolean isDisliked(@PathVariable("usrid") String userId, @PathVariable("jokeid") String jokeId) {
+		return service.isDisliked(service.convertStringToLong(userId), service.convertStringToLong(jokeId));
+	}
 }
